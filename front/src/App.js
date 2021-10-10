@@ -1,24 +1,20 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import InputForm from "./components/inputForm/inputForm";
 import Post from "./components/post/Post";
 import axios from "axios";
 import './App.css';
+import {useDispatch, useSelector} from "react-redux";
+import {authorChange, postsSet, textChange} from "./store/action";
 
 function App() {
     const url = 'http://146.185.154.90:8000/messages';
-    let interval = null
 
-    const [posts, setPosts] = useState([]);
-    const [authorInput, setAuthorInput] = useState('');
-    const [textInput, setTextInput] = useState('');
+    const dispatch = useDispatch();
+    const textMessage = useSelector(state => state.textMessage);
+    const authorMessage = useSelector(state => state.authorMessage);
+    const posts = useSelector(state => state.posts);
 
-    const changeAuthorInputValue = (value) => {
-        setAuthorInput(value);
-    };
-
-    const changeTextInputValue = (value) => {
-        setTextInput(value);
-    };
+    let interval = null;
 
     const getData = async () => {
         try {
@@ -29,39 +25,37 @@ function App() {
                 data = await axios.get(url)
             }
             if (data.data.length > 0) {
-                setPosts((prev) => {
-                    clearInterval(interval)
-                    return [...prev].concat(data.data);
-                })
+                dispatch(postsSet(data.data));
+                clearInterval(interval)
             }
         } catch (e) {
-            console.log(e, error)
+            console.log(e);
         }
-    }
+    };
 
     useEffect(() => {
         interval = setInterval(async () => {
             await getData()
-        }, 1000);
+        }, 2000);
     }, [posts]);
 
     const addPost = async () => {
         const data = new URLSearchParams();
-        data.set('message', textInput);
-        data.set('author', authorInput);
+        data.set('message', textMessage);
+        data.set('author', authorMessage);
         await axios.post(url, data);
-        setTextInput('')
+        dispatch(textChange(''));
     }
 
     return (
         <div className="container">
             <div className="inner-container">
                 <InputForm
-                    setText={(value) => changeTextInputValue(value)}
-                    setAuthor={(value) => changeAuthorInputValue(value)}
+                    setText={(value) => dispatch(textChange(value))}
+                    setAuthor={(value) => dispatch(authorChange(value))}
                     add={() => addPost()}
-                    text={textInput}
-                    author={authorInput}
+                    text={textMessage}
+                    author={authorMessage}
                 />
                 <div className="posts">
                     {posts.map((post, index) => {
