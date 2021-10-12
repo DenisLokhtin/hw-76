@@ -40,12 +40,17 @@ function App() {
     }, [posts]);
 
     const addPost = async () => {
-        const data = {
-            "message": textMessage,
-            "author": authorMessage
-        };
-        await axios.post(url, data);
-        dispatch(textChange(''));
+      try {
+          const data = {
+              "message": textMessage,
+              "author": authorMessage
+          };
+          await axios.post(url, data);
+          dispatch(textChange(''));
+      } catch (e) {
+          console.log(e.response.data);
+          alert(e.response.data.error);
+      }
     }
 
     return (

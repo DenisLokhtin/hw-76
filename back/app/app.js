@@ -5,7 +5,6 @@ const { nanoid } = require("nanoid");
 const ID = nanoid();
 
 router.get('/', (req, res) => {
-  console.log(req.query.datetime, 0);
   if (req.query.datetime === undefined) {
     const messages = fileDB.getItems();
     res.send(messages);
@@ -18,11 +17,15 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const currentDate = new Date();
-  const body = {...req.body, datetime: currentDate, id: ID}
-  fileDB.addItem(body);
-  res.setHeader('content-type', 'application/JSON');
-  res.send(JSON.stringify(body));
+  if (req.body.message !== '' && req.body.author !== '') {
+    const currentDate = new Date();
+    const body = {...req.body, datetime: currentDate, id: ID}
+    fileDB.addItem(body);
+    res.setHeader('content-type', 'application/JSON');
+    res.send(JSON.stringify(body));
+  } else {
+    res.status(400).send(JSON.stringify({"error":"Author and message must be present in the request"}))
+  }
 });
 
 module.exports = router;
