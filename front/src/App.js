@@ -7,7 +7,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {authorChange, postsSet, textChange} from "./store/action";
 
 function App() {
-    const url = 'http://146.185.154.90:8000/messages';
+    const url = 'http://localhost:8000/message';
 
     const dispatch = useDispatch();
     const textMessage = useSelector(state => state.textMessage);
@@ -40,9 +40,10 @@ function App() {
     }, [posts]);
 
     const addPost = async () => {
-        const data = new URLSearchParams();
-        data.set('message', textMessage);
-        data.set('author', authorMessage);
+        const data = {
+            "message": textMessage,
+            "author": authorMessage
+        };
         await axios.post(url, data);
         dispatch(textChange(''));
     }

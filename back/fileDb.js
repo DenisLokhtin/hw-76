@@ -16,10 +16,13 @@ module.exports = {
         fs.writeFileSync(file, JSON.stringify(data))
     },
     getItems() {
-        return data
+        return data.slice(-30);
     },
     addItem(item) {
         data.push(item)
         this.save()
+    },
+    getLasts(date) {
+        return data.filter(message => message.datetime > date);
     },
 };
