@@ -1,14 +1,11 @@
 import React, {useEffect} from "react";
 import InputForm from "./components/inputForm/inputForm";
 import Post from "./components/post/Post";
-import axios from "axios";
 import './App.css';
 import {useDispatch, useSelector} from "react-redux";
-import {authorChange, postsSet, textChange} from "./store/action";
+import {addPost, authorChange, getData, textChange} from "./store/action";
 
 function App() {
-    const url = 'http://localhost:8000/message';
-
     const dispatch = useDispatch();
     const textMessage = useSelector(state => state.textMessage);
     const authorMessage = useSelector(state => state.authorMessage);
@@ -16,42 +13,12 @@ function App() {
 
     let interval = null;
 
-    const getData = async () => {
-        try {
-            let data = null
-            if (posts.length > 0) {
-                data = await axios.get(url + '?datetime=' + posts[posts.length - 1]['datetime'])
-            } else {
-                data = await axios.get(url)
-            }
-            if (data.data.length > 0) {
-                dispatch(postsSet(data.data));
-                clearInterval(interval)
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
     useEffect(() => {
         interval = setInterval(async () => {
-            await getData()
+            await dispatch(getData(posts, interval));
         }, 2000);
     }, [posts]);
 
-    const addPost = async () => {
-      try {
-          const data = {
-              "message": textMessage,
-              "author": authorMessage
-          };
-          await axios.post(url, data);
-          dispatch(textChange(''));
-      } catch (e) {
-          console.log(e.response.data);
-          alert(e.response.data.error);
-      }
-    }
 
     return (
         <div className="container">
@@ -59,7 +26,7 @@ function App() {
                 <InputForm
                     setText={(value) => dispatch(textChange(value))}
                     setAuthor={(value) => dispatch(authorChange(value))}
-                    add={() => addPost()}
+                    add={() => dispatch(addPost(textMessage, authorMessage))}
                     text={textMessage}
                     author={authorMessage}
                 />
